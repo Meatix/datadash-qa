@@ -8,32 +8,21 @@ const seeds = [22, 23, 24, 25, 26, 27, 28, 29, 30, 31];
   let grandTotal = 0;
 
   for (const seed of seeds) {
-    const url = `https://exam.sanand.workers.dev/tds2025-01-ga2/scrape-playwright?seed=${seed}`;
+    const url = `https://sanand0.github.io/tdsdata/js_table/?seed=${seed}`;
     
     await page.goto(url, { waitUntil: 'networkidle' });
-    
-    // Wait for any content to load
-    await page.waitForTimeout(2000);
-
-    // Debug: print the full page content so we can see the structure
-    const content = await page.content();
-    console.log(`--- Seed ${seed} HTML snippet ---`);
-    console.log(content.substring(0, 2000));
+    await page.waitForTimeout(3000);
 
     const total = await page.evaluate(() => {
       let sum = 0;
-      
-      // Try all number-like text in the entire page
-      const allElements = document.querySelectorAll('td, th, span, div, p, li');
-      allElements.forEach(el => {
-        const text = el.innerText?.trim();
-        if (text) {
-          const num = parseFloat(text.replace(/,/g, ''));
-          if (!isNaN(num) && text.match(/^-?[\d,]+\.?\d*$/)) {
-            sum += num;
-          }
-        }
-      });
+      // Get ALL text content and extract numbers
+      const body = document.body.innerText;
+      const numbers = body.match(/-?\d+(\.\d+)?/g);
+      if (numbers) {
+        numbers.forEach(n => {
+          sum += parseFloat(n);
+        });
+      }
       return sum;
     });
 
